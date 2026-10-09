@@ -66,6 +66,25 @@ public class Venue
         return true;
     }
 
+    // FÖRKLARING: Lediga timmar ett visst datum, t.ex. till en kalendervy.
+    // Timmar som redan har börjat visas inte. Bara datumdelen av "day" används.
+    public IReadOnlyList<TimeSlot> FreeHours(DateTime day, DateTime now)
+    {
+        var free = new List<TimeSlot>();
+
+        for (var hour = OpensHour; hour < ClosesHour; hour++)
+        {
+            var slot = new TimeSlot(day.Date.AddHours(hour));
+
+            if (slot.Start > now && IsAvailable(slot, now))
+            {
+                free.Add(slot);
+            }
+        }
+
+        return free;
+    }
+
     // FÖRKLARING: Skapar en bokning. Kommunen får Confirmed direkt (0 kr), övriga får Reserved och måste betala.
     public Booking Reserve(TimeSlot slot, BookerType bookerType, DateTime now)
     {
