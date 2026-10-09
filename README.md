@@ -29,6 +29,8 @@ Test cases goes in `TE.DomainStorytellingApplied.Domain.Tests`
 A minimal booking system (MVP) for municipal venues (classrooms, halls, pitches).
 There is no UI, API or database. The only way to run it is through the tests.
 
+**Overview with diagrams (Swedish): [docs/booking-mvp.md](docs/booking-mvp.md)**
+
 ## Design in short
 | Type | What it is |
 |---|---|
