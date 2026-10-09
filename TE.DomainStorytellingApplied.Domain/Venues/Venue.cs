@@ -122,7 +122,8 @@ public class Venue
             return ConfirmResult.Confirmed;
         }
 
-        if (booking.Status == BookingStatus.Expired)
+        // Utgången eller avbokad innan betalningen kom: pengarna måste tillbaka.
+        if (booking.Status == BookingStatus.Expired || booking.Status == BookingStatus.Cancelled)
         {
             return ConfirmResult.RefundRequired;
         }
@@ -135,6 +136,33 @@ public class Venue
 
         booking.Confirm();
         return ConfirmResult.Confirmed;
+    }
+
+    // FÖRKLARING: Avbokning, bara innan tiden har börjat. Returnerar beloppet som ska betalas tillbaka:
+    // hela priset om bokningen var bekräftad, annars 0 kr (inget var betalt).
+    // Full återbetalning är ett antagande, de riktiga avbokningsreglerna är okända.
+    public Money CancelBooking(BookingId id, DateTime now)
+    {
+        var booking = Find(id);
+
+        if (booking.Status == BookingStatus.Cancelled || booking.Status == BookingStatus.Expired)
+        {
+            throw new DomainException("Bokningen är redan avslutad.");
+        }
+
+        if (booking.Slot.Start <= now)
+        {
+            throw new DomainException("Det går inte att avboka en tid som redan har börjat.");
+        }
+
+        var refund = Money.Zero;
+        if (booking.Status == BookingStatus.Confirmed)
+        {
+            refund = booking.Price;
+        }
+
+        booking.Cancel();
+        return refund;
     }
 
     // Finns det en ANNAN bokning som blockerar samma tid?
