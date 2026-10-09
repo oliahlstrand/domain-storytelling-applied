@@ -36,4 +36,44 @@ public class VenueReserveTests
 
         booking.Price.ShouldBe(new Money(200));
     }
+
+    [Fact]
+    public void GivenTimeInThePast_WhenReserving_ShouldThrow()
+    {
+        var pastSlot = new TimeSlot(new DateTime(2026, 10, 9, 8, 0, 0));
+
+        Should.Throw<DomainException>(() => NewVenue().Reserve(pastSlot, BookerType.Association, Now));
+    }
+
+    [Fact]
+    public void GivenSlotStartingExactlyNow_WhenReserving_ShouldThrow()
+    {
+        var slot = new TimeSlot(new DateTime(2026, 10, 9, 9, 0, 0));
+        var now = slot.Start;
+
+        Should.Throw<DomainException>(() => NewVenue().Reserve(slot, BookerType.Association, now));
+    }
+
+    // Lokalen är öppen 08-22.
+    [Theory]
+    [InlineData(7, 1)]
+    [InlineData(21, 2)]
+    [InlineData(22, 1)]
+    public void GivenOutsideOpeningHours_WhenReserving_ShouldThrow(int startHour, int hours)
+    {
+        var slot = new TimeSlot(new DateTime(2026, 10, 10, startHour, 0, 0), hours);
+
+        Should.Throw<DomainException>(() => NewVenue().Reserve(slot, BookerType.Association, Now));
+    }
+
+    [Theory]
+    [InlineData(8, 1)]
+    [InlineData(21, 1)]
+    [InlineData(8, 14)]
+    public void GivenWithinOpeningHours_WhenReserving_ShouldSucceed(int startHour, int hours)
+    {
+        var slot = new TimeSlot(new DateTime(2026, 10, 10, startHour, 0, 0), hours);
+
+        Should.NotThrow(() => NewVenue().Reserve(slot, BookerType.Association, Now));
+    }
 }

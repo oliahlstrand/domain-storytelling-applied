@@ -46,6 +46,21 @@ public class Venue
     // FÖRKLARING: Skapar en bokning. Kommunen får Confirmed direkt (0 kr), övriga får Reserved och måste betala.
     public Booking Reserve(TimeSlot slot, BookerType bookerType, DateTime now)
     {
+        // En tid som börjar exakt nu räknas som redan börjad.
+        if (slot.Start <= now)
+        {
+            throw new DomainException("Tiden har redan börjat eller passerat.");
+        }
+
+        // Hela tiden måste rymmas inom samma dags öppettider.
+        // SYNTAX: slot.Start.Date är samma dag klockan 00:00.
+        var opensAt = slot.Start.Date.AddHours(OpensHour);
+        var closesAt = slot.Start.Date.AddHours(ClosesHour);
+        if (slot.Start < opensAt || slot.End > closesAt)
+        {
+            throw new DomainException("Tiden ligger utanför lokalens öppettider.");
+        }
+
         // Prisregeln: kommunen betalar inget, alla andra betalar timpris gånger antal timmar.
         var price = HourlyRate.Times(slot.Hours);
         if (bookerType == BookerType.Municipality)
