@@ -107,4 +107,55 @@ public class BookingFlowTests
     {
         Should.Throw<DomainException>(() => _service.PaymentSucceeded(PaymentId.New(), Now));
     }
+
+    [Fact]
+    public void GivenConfirmedBooking_WhenCancelled_ShouldRefundAndFreeSlot()
+    {
+        var booking = _service.Reserve(Tomorrow18, BookerType.Association, Now);
+        _service.PaymentSucceeded(_gateway.StartedPayments[0], Now.AddMinutes(1));
+
+        var refund = _service.Cancel(booking.Id, Now.AddHours(1));
+
+        refund.ShouldBe(booking.Price);
+        _gateway.RefundedPayments.Count.ShouldBe(1);
+        _service.FindPaymentForBooking(booking.Id).Status.ShouldBe(PaymentStatus.Refunded);
+        _service.Venue.IsAvailable(Tomorrow18, Now.AddHours(1)).ShouldBeTrue();
+    }
+
+    [Fact]
+    public void GivenCancelledBeforePayment_WhenPaymentArrivesLater_ShouldRefund()
+    {
+        var booking = _service.Reserve(Tomorrow18, BookerType.Association, Now);
+        _service.Cancel(booking.Id, Now.AddMinutes(2));
+
+        var result = _service.PaymentSucceeded(_gateway.StartedPayments[0], Now.AddMinutes(3));
+
+        result.ShouldBe(ConfirmResult.RefundRequired);
+        _gateway.RefundedPayments.Count.ShouldBe(1);
+    }
+
+    [Fact]
+    public void GivenCancelledAndRefunded_WhenSamePaymentMessageArrivesAgain_ShouldNotRefundTwice()
+    {
+        var booking = _service.Reserve(Tomorrow18, BookerType.Association, Now);
+        var paymentId = _gateway.StartedPayments[0];
+        _service.PaymentSucceeded(paymentId, Now.AddMinutes(1));
+        _service.Cancel(booking.Id, Now.AddHours(1));
+
+        var result = _service.PaymentSucceeded(paymentId, Now.AddHours(2));
+
+        result.ShouldBe(ConfirmResult.RefundRequired);
+        _gateway.RefundedPayments.Count.ShouldBe(1);
+    }
+
+    [Fact]
+    public void GivenMunicipalityBooking_WhenCancelled_ShouldNotRefundAnything()
+    {
+        var booking = _service.Reserve(Tomorrow18, BookerType.Municipality, Now);
+
+        var refund = _service.Cancel(booking.Id, Now.AddHours(1));
+
+        refund.IsZero.ShouldBeTrue();
+        _gateway.RefundedPayments.ShouldBeEmpty();
+    }
 }

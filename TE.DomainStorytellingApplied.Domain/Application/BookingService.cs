@@ -74,6 +74,22 @@ public class BookingService
         return result;
     }
 
+    // STEG 3: Bokaren avbokar. Venue avgör om det är tillåtet och hur mycket som ska tillbaka.
+    // Var bokningen betald (belopp större än 0) ber vi betaltjänsten betala tillbaka.
+    public Money Cancel(BookingId bookingId, DateTime now)
+    {
+        var refund = _venue.CancelBooking(bookingId, now);
+
+        if (!refund.IsZero)
+        {
+            var payment = FindPaymentForBooking(bookingId);
+            _gateway.Refund(payment.Id, refund);
+            payment.MarkRefunded();
+        }
+
+        return refund;
+    }
+
     public Payment FindPaymentForBooking(BookingId bookingId)
     {
         foreach (var payment in _payments)
