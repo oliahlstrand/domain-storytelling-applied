@@ -43,6 +43,20 @@ public class Venue
         ClosesHour = closesHour;
     }
 
+    // FÖRKLARING: Är tiden ledig? Ledig = ingen bokning som krockar med tiden.
+    public bool IsAvailable(TimeSlot slot, DateTime now)
+    {
+        foreach (var booking in _bookings)
+        {
+            if (booking.Slot.Overlaps(slot))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     // FÖRKLARING: Skapar en bokning. Kommunen får Confirmed direkt (0 kr), övriga får Reserved och måste betala.
     public Booking Reserve(TimeSlot slot, BookerType bookerType, DateTime now)
     {
@@ -59,6 +73,11 @@ public class Venue
         if (slot.Start < opensAt || slot.End > closesAt)
         {
             throw new DomainException("Tiden ligger utanför lokalens öppettider.");
+        }
+
+        if (!IsAvailable(slot, now))
+        {
+            throw new DomainException("Tiden är redan bokad.");
         }
 
         // Prisregeln: kommunen betalar inget, alla andra betalar timpris gånger antal timmar.

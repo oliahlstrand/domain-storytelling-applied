@@ -76,4 +76,52 @@ public class VenueReserveTests
 
         Should.NotThrow(() => NewVenue().Reserve(slot, BookerType.Association, Now));
     }
+
+    [Fact]
+    public void GivenReservedSlot_WhenCheckingAvailability_ShouldBeTaken()
+    {
+        var venue = NewVenue();
+
+        venue.IsAvailable(Tomorrow18, Now).ShouldBeTrue();
+        venue.Reserve(Tomorrow18, BookerType.Association, Now);
+
+        venue.IsAvailable(Tomorrow18, Now).ShouldBeFalse();
+    }
+
+    [Fact]
+    public void GivenSlotAlreadyReserved_WhenReservingAgain_ShouldThrow()
+    {
+        var venue = NewVenue();
+        venue.Reserve(Tomorrow18, BookerType.Association, Now);
+
+        Should.Throw<DomainException>(() => venue.Reserve(Tomorrow18, BookerType.Municipality, Now));
+    }
+
+    [Fact]
+    public void GivenOverlappingLongerBooking_WhenReserving_ShouldThrow()
+    {
+        var venue = NewVenue();
+        venue.Reserve(new TimeSlot(Tomorrow18.Start.AddHours(1)), BookerType.Association, Now);
+
+        var twoHours = new TimeSlot(Tomorrow18.Start, 2);
+
+        Should.Throw<DomainException>(() => venue.Reserve(twoHours, BookerType.PrivatePerson, Now));
+    }
+
+    [Fact]
+    public void GivenBookingTheHourBefore_WhenReservingNextHour_ShouldSucceed()
+    {
+        var venue = NewVenue();
+        venue.Reserve(Tomorrow18, BookerType.Association, Now);
+
+        Should.NotThrow(() => venue.Reserve(new TimeSlot(Tomorrow18.End), BookerType.PrivatePerson, Now));
+    }
+
+    [Fact]
+    public void GivenSameSlotInAnotherVenue_WhenReserving_ShouldSucceed()
+    {
+        NewVenue().Reserve(Tomorrow18, BookerType.Association, Now);
+
+        Should.NotThrow(() => NewVenue().Reserve(Tomorrow18, BookerType.Association, Now));
+    }
 }
