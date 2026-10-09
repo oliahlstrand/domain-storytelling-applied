@@ -13,4 +13,10 @@ internal static class TestData
     {
         return new Venue("Sporthallen", new Money(100), 8, 22);
     }
+
+    // Tidpunkten då en reservation gjord vid "reservedAt" går ut.
+    public static DateTime AfterTimeout(DateTime reservedAt)
+    {
+        return reservedAt + Booking.ReservationTimeout;
+    }
 }

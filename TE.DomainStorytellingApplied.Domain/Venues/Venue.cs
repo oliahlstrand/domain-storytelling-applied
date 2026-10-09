@@ -43,12 +43,12 @@ public class Venue
         ClosesHour = closesHour;
     }
 
-    // FÖRKLARING: Är tiden ledig? Ledig = ingen bokning som krockar med tiden.
+    // FÖRKLARING: Är tiden ledig? Ledig = ingen bokning som blockerar och krockar med tiden.
     public bool IsAvailable(TimeSlot slot, DateTime now)
     {
         foreach (var booking in _bookings)
         {
-            if (booking.Slot.Overlaps(slot))
+            if (booking.BlocksSlot(now) && booking.Slot.Overlaps(slot))
             {
                 return false;
             }
@@ -87,7 +87,7 @@ public class Venue
             price = Money.Zero;
         }
 
-        var booking = new Booking(slot, bookerType, price);
+        var booking = new Booking(slot, bookerType, price, now);
 
         if (price.IsZero)
         {
