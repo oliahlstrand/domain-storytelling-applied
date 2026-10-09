@@ -15,11 +15,3 @@ public readonly record struct BookingId(Guid Value)
         return new BookingId(Guid.NewGuid());
     }
 }
-
-public readonly record struct PaymentId(Guid Value)
-{
-    public static PaymentId New()
-    {
-        return new PaymentId(Guid.NewGuid());
-    }
-}
