@@ -17,16 +17,6 @@ public class Venue
 
     public Venue(string name, Money hourlyRate, int opensHour, int closesHour)
     {
-        if (string.IsNullOrWhiteSpace(name))
-        {
-            throw new DomainException("En lokal måste ha ett namn.");
-        }
-
-        if (opensHour < 0 || closesHour > 24 || opensHour >= closesHour)
-        {
-            throw new DomainException("Öppettiderna är ogiltiga.");
-        }
-
         Id = VenueId.New();
         Name = name;
         HourlyRate = hourlyRate;
