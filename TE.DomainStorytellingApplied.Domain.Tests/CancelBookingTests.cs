@@ -2,7 +2,6 @@ using static TE.DomainStorytellingApplied.Domain.Tests.TestData;
 
 namespace TE.DomainStorytellingApplied.Domain.Tests;
 
-// FÖRKLARING: Tester för avbokning.
 public class CancelBookingTests
 {
     [Fact]

@@ -1,12 +1,5 @@
 namespace TE.DomainStorytellingApplied.Domain;
 
-// FÖRKLARING: APPLIKATIONSLAGER. Innehåller INGA affärsregler. Den samordnar Venue, Payment och
-// betaltjänsten i rätt ordning. Reglerna bor kvar i Venue och Payment.
-//
-// FÖRENKLINGAR i denna PoC:
-//   - En lokal per BookingService (i verkligheten hämtas rätt Venue från en databas).
-//   - Betalningarna sparas i en lista i minnet.
-//   - Ingen hantering av samtidiga anrop.
 public class BookingService
 {
     private readonly Venue _venue;
@@ -29,9 +22,6 @@ public class BookingService
         get { return _payments; }
     }
 
-    // STEG 1: Bokaren väljer en tid. Venue kontrollerar reglerna.
-    // Kommunen är redan Confirmed (0 kr), så ingen betalning startas.
-    // Övriga är Reserved: vi skapar en Payment och ber betaltjänsten ta emot betalningen.
     public Booking Reserve(TimeSlot slot, BookerType bookerType, DateTime now)
     {
         var booking = _venue.Reserve(slot, bookerType, now);
@@ -46,13 +36,10 @@ public class BookingService
         return booking;
     }
 
-    // STEG 2: Betaltjänsten säger "betalningen är genomförd". Tål samma besked flera gånger.
-    // Svarar Venue RefundRequired (betalningen kom för sent) ber vi betaltjänsten betala tillbaka.
     public ConfirmResult PaymentSucceeded(PaymentId paymentId, DateTime now)
     {
         var payment = FindPayment(paymentId);
 
-        // Redan återbetald: gör ingenting igen, så vi aldrig betalar tillbaka två gånger.
         if (payment.Status == PaymentStatus.Refunded)
         {
             return ConfirmResult.RefundRequired;
@@ -74,8 +61,6 @@ public class BookingService
         return result;
     }
 
-    // STEG 3: Bokaren avbokar. Venue avgör om det är tillåtet och hur mycket som ska tillbaka.
-    // Var bokningen betald (belopp större än 0) ber vi betaltjänsten betala tillbaka.
     public Money Cancel(BookingId bookingId, DateTime now)
     {
         var refund = _venue.CancelBooking(bookingId, now);

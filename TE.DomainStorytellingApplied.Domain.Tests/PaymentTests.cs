@@ -2,7 +2,6 @@ using static TE.DomainStorytellingApplied.Domain.Tests.TestData;
 
 namespace TE.DomainStorytellingApplied.Domain.Tests;
 
-// FÖRKLARING: Tester för Payment-aggregatet.
 public class PaymentTests
 {
     [Fact]

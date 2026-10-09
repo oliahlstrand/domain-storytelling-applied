@@ -2,7 +2,6 @@ using static TE.DomainStorytellingApplied.Domain.Tests.TestData;
 
 namespace TE.DomainStorytellingApplied.Domain.Tests;
 
-// FÖRKLARING: Tester för "vad är ledigt och vad är upptaget?".
 public class FreeHoursTests
 {
     private static readonly DateTime Tomorrow = Tomorrow18.Start.Date;
@@ -12,7 +11,6 @@ public class FreeHoursTests
     {
         var free = NewVenue().FreeHours(Tomorrow, Now);
 
-        // Öppet 08-22 ger 14 lediga timmar.
         free.Count.ShouldBe(14);
         free[0].Start.Hour.ShouldBe(8);
         free[13].Start.Hour.ShouldBe(21);
@@ -45,7 +43,6 @@ public class FreeHoursTests
     [Fact]
     public void GivenToday_WhenListingFreeHours_ShouldExcludeHoursAlreadyStarted()
     {
-        // Klockan är 08:30, så första lediga hela timmen är 09:00.
         var free = NewVenue().FreeHours(Now, Now);
 
         free[0].Start.Hour.ShouldBe(9);

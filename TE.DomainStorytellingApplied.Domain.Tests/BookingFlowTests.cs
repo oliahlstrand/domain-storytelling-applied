@@ -2,15 +2,11 @@ using static TE.DomainStorytellingApplied.Domain.Tests.TestData;
 
 namespace TE.DomainStorytellingApplied.Domain.Tests;
 
-// FÖRKLARING: SCENARIOTESTER. De spelar upp hela domain storyn: bokaren reserverar, vi låtsas vara
-// betaltjänsten och skickar besked, och vi kontrollerar slutläget. Läs dem som små berättelser.
 public class BookingFlowTests
 {
     private readonly FakePaymentGateway _gateway = new FakePaymentGateway();
     private readonly BookingService _service;
 
-    // SYNTAX: xUnit skapar en ny instans av testklassen för varje test, så varje test får en egen
-    // lokal och en egen fejk-betaltjänst.
     public BookingFlowTests()
     {
         _service = new BookingService(NewVenue(), _gateway);

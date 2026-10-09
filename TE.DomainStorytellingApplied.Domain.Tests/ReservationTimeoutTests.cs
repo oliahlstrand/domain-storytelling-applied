@@ -2,7 +2,6 @@ using static TE.DomainStorytellingApplied.Domain.Tests.TestData;
 
 namespace TE.DomainStorytellingApplied.Domain.Tests;
 
-// FÖRKLARING: En obetald reservation håller tiden i 15 minuter. Sedan blir tiden ledig av sig själv.
 public class ReservationTimeoutTests
 {
     [Fact]

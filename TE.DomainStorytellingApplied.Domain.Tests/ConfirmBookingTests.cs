@@ -2,7 +2,6 @@ using static TE.DomainStorytellingApplied.Domain.Tests.TestData;
 
 namespace TE.DomainStorytellingApplied.Domain.Tests;
 
-// FÖRKLARING: Tester för att bekräfta en bokning när betalningen är klar.
 public class ConfirmBookingTests
 {
     [Fact]
@@ -63,7 +62,6 @@ public class ConfirmBookingTests
         venue.Reserve(Tomorrow18, BookerType.PrivatePerson, later);
         venue.ConfirmBooking(late.Id, later.AddMinutes(1));
 
-        // Den andra reservationen har också gått ut, men den sena bokningen ska inte väckas till liv.
         var result = venue.ConfirmBooking(late.Id, AfterTimeout(later));
 
         result.ShouldBe(ConfirmResult.RefundRequired);

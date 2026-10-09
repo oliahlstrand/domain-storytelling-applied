@@ -2,7 +2,6 @@ using static TE.DomainStorytellingApplied.Domain.Tests.TestData;
 
 namespace TE.DomainStorytellingApplied.Domain.Tests;
 
-// FÖRKLARING: Tester för att reservera en tid i en lokal.
 public class VenueReserveTests
 {
     [Fact]
@@ -54,7 +53,6 @@ public class VenueReserveTests
         Should.Throw<DomainException>(() => NewVenue().Reserve(slot, BookerType.Association, now));
     }
 
-    // Lokalen är öppen 08-22.
     [Theory]
     [InlineData(7, 1)]
     [InlineData(21, 2)]
