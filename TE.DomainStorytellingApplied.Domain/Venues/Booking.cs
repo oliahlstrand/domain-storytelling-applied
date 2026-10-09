@@ -3,9 +3,7 @@ namespace TE.DomainStorytellingApplied.Domain;
 public enum BookingStatus
 {
     Reserved,
-    Confirmed,
-    Expired,
-    Cancelled
+    Confirmed
 }
 
 public class Booking
@@ -36,21 +34,11 @@ public class Booking
             return true;
         }
 
-        return Status == BookingStatus.Reserved && now < ReservedUntil;
+        return now < ReservedUntil;
     }
 
     internal void Confirm()
     {
         Status = BookingStatus.Confirmed;
-    }
-
-    internal void Expire()
-    {
-        Status = BookingStatus.Expired;
-    }
-
-    internal void Cancel()
-    {
-        Status = BookingStatus.Cancelled;
     }
 }

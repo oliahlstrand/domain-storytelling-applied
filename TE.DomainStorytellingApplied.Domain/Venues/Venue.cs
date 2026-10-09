@@ -1,11 +1,5 @@
 namespace TE.DomainStorytellingApplied.Domain;
 
-public enum ConfirmResult
-{
-    Confirmed,
-    RefundRequired
-}
-
 public class Venue
 {
     private readonly List<Booking> _bookings = new List<Booking>();
@@ -13,7 +7,6 @@ public class Venue
     public VenueId Id { get; }
     public string Name { get; }
     public Money HourlyRate { get; }
-
     public int OpensHour { get; }
     public int ClosesHour { get; }
 
@@ -108,65 +101,21 @@ public class Venue
         return booking;
     }
 
-    public ConfirmResult ConfirmBooking(BookingId id, DateTime now)
+    public void ConfirmBooking(BookingId id, DateTime now)
     {
         var booking = Find(id);
 
-        if (booking.Status == BookingStatus.Confirmed)
+        if (booking.Status != BookingStatus.Reserved)
         {
-            return ConfirmResult.Confirmed;
+            throw new DomainException("Bokningen väntar inte på betalning.");
         }
 
-        if (booking.Status == BookingStatus.Expired || booking.Status == BookingStatus.Cancelled)
+        if (now >= booking.ReservedUntil)
         {
-            return ConfirmResult.RefundRequired;
-        }
-
-        if (booking.Slot.Start <= now || SlotTakenByAnother(booking, now))
-        {
-            booking.Expire();
-            return ConfirmResult.RefundRequired;
+            throw new DomainException("Reservationen har gått ut.");
         }
 
         booking.Confirm();
-        return ConfirmResult.Confirmed;
-    }
-
-    public Money CancelBooking(BookingId id, DateTime now)
-    {
-        var booking = Find(id);
-
-        if (booking.Status == BookingStatus.Cancelled || booking.Status == BookingStatus.Expired)
-        {
-            throw new DomainException("Bokningen är redan avslutad.");
-        }
-
-        if (booking.Slot.Start <= now)
-        {
-            throw new DomainException("Det går inte att avboka en tid som redan har börjat.");
-        }
-
-        var refund = Money.Zero;
-        if (booking.Status == BookingStatus.Confirmed)
-        {
-            refund = booking.Price;
-        }
-
-        booking.Cancel();
-        return refund;
-    }
-
-    private bool SlotTakenByAnother(Booking booking, DateTime now)
-    {
-        foreach (var other in _bookings)
-        {
-            if (other != booking && other.BlocksSlot(now) && other.Slot.Overlaps(booking.Slot))
-            {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     private Booking Find(BookingId id)
