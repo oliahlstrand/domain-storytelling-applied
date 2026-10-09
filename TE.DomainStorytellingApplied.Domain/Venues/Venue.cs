@@ -1,5 +1,14 @@
 namespace TE.DomainStorytellingApplied.Domain;
 
+// FÖRKLARING: Svaret när en betald bokning ska bekräftas.
+// RefundRequired = betalningen kom för sent, tiden går inte att ge kunden. Domänen kan inte själv
+// betala tillbaka (det gör betaltjänsten), så den talar om att det behövs.
+public enum ConfirmResult
+{
+    Confirmed,
+    RefundRequired
+}
+
 // FÖRKLARING: AGGREGATROT. Venue = en lokal som kommunen hyr ut (klassrum, hall, fotbollsplan ...).
 // Venue äger alla sina bokningar. Regeln "ingen dubbelbokning" gäller alla bokningar för en lokal,
 // så alla ändringar måste gå genom samma objekt. Två lokaler bokas helt oberoende av varandra.
@@ -97,5 +106,61 @@ public class Venue
         _bookings.Add(booking);
 
         return booking;
+    }
+
+    // FÖRKLARING: Anropas när betalningen är klar. Tål att anropas flera gånger för samma bokning
+    // (betaltjänster skickar ibland samma besked två gånger).
+    // Sen betalning (reservationen hann gå ut):
+    //   - tiden är fortfarande ledig och har inte börjat: bekräfta ändå, kunden har ju betalat.
+    //   - någon annan har tagit tiden, eller tiden har börjat: RefundRequired.
+    public ConfirmResult ConfirmBooking(BookingId id, DateTime now)
+    {
+        var booking = Find(id);
+
+        if (booking.Status == BookingStatus.Confirmed)
+        {
+            return ConfirmResult.Confirmed;
+        }
+
+        if (booking.Status == BookingStatus.Expired)
+        {
+            return ConfirmResult.RefundRequired;
+        }
+
+        if (booking.Slot.Start <= now || SlotTakenByAnother(booking, now))
+        {
+            booking.Expire();
+            return ConfirmResult.RefundRequired;
+        }
+
+        booking.Confirm();
+        return ConfirmResult.Confirmed;
+    }
+
+    // Finns det en ANNAN bokning som blockerar samma tid?
+    private bool SlotTakenByAnother(Booking booking, DateTime now)
+    {
+        foreach (var other in _bookings)
+        {
+            if (other != booking && other.BlocksSlot(now) && other.Slot.Overlaps(booking.Slot))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private Booking Find(BookingId id)
+    {
+        foreach (var booking in _bookings)
+        {
+            if (booking.Id == id)
+            {
+                return booking;
+            }
+        }
+
+        throw new DomainException("Bokningen finns inte.");
     }
 }

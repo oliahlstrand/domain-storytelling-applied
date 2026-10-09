@@ -3,11 +3,13 @@ namespace TE.DomainStorytellingApplied.Domain;
 // FÖRKLARING: Livscykeln för en bokning.
 //   Reserved --betalning ok--> Confirmed
 //   Reserved --15 min utan betalning--> tiden blir ledig (status står kvar som Reserved)
+//   Reserved --betalning för sent och tiden är tagen--> Expired
 //   Kommunen går direkt till Confirmed (kostar 0 kr).
 public enum BookingStatus
 {
     Reserved,
-    Confirmed
+    Confirmed,
+    Expired
 }
 
 // FÖRKLARING: ENTITET. Har en identitet (Id) och förändras över tid (Status).
@@ -55,5 +57,10 @@ public class Booking
     internal void Confirm()
     {
         Status = BookingStatus.Confirmed;
+    }
+
+    internal void Expire()
+    {
+        Status = BookingStatus.Expired;
     }
 }
