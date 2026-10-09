@@ -38,7 +38,7 @@ public class Venue
     {
         foreach (var booking in _bookings)
         {
-            if (booking.BlocksSlot(now) && booking.Slot.Overlaps(slot))
+            if (booking.BlocksSlot(now) && booking.Slot == slot)
             {
                 return false;
             }
@@ -71,9 +71,7 @@ public class Venue
             throw new DomainException("Tiden har redan börjat eller passerat.");
         }
 
-        var opensAt = slot.Start.Date.AddHours(OpensHour);
-        var closesAt = slot.Start.Date.AddHours(ClosesHour);
-        if (slot.Start < opensAt || slot.End > closesAt)
+        if (slot.Start.Hour < OpensHour || slot.Start.Hour >= ClosesHour)
         {
             throw new DomainException("Tiden ligger utanför lokalens öppettider.");
         }
@@ -83,7 +81,7 @@ public class Venue
             throw new DomainException("Tiden är redan bokad.");
         }
 
-        var price = HourlyRate.Times(slot.Hours);
+        var price = HourlyRate;
         if (bookerType == BookerType.Municipality)
         {
             price = Money.Zero;

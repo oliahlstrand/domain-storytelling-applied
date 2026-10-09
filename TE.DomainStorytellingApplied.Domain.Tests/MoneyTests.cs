@@ -15,12 +15,6 @@ public class MoneyTests
     }
 
     [Fact]
-    public void GivenMoney_WhenMultiplying_ShouldReturnNewMoneyWithProduct()
-    {
-        new Money(100).Times(2).Amount.ShouldBe(200);
-    }
-
-    [Fact]
     public void GivenTwoMoneyWithSameAmount_WhenComparing_ShouldBeEqual()
     {
         new Money(100).ShouldBe(new Money(100));

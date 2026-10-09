@@ -23,9 +23,4 @@ public readonly record struct Money
     {
         get { return Amount == 0; }
     }
-
-    public Money Times(int factor)
-    {
-        return new Money(Amount * factor);
-    }
 }

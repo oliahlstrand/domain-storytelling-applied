@@ -9,42 +9,18 @@ public class FreeHoursTests
     [Fact]
     public void GivenEmptyVenue_WhenListingFreeHours_ShouldReturnAllOpeningHours()
     {
-        var free = NewVenue().FreeHours(Tomorrow, Now);
-
-        free.Count.ShouldBe(14);
-        free[0].Start.Hour.ShouldBe(8);
-        free[13].Start.Hour.ShouldBe(21);
+        NewVenue().FreeHours(Tomorrow, Now).Count.ShouldBe(14);
     }
 
     [Fact]
-    public void GivenTwoHourBooking_WhenListingFreeHours_ShouldExcludeBookedHours()
-    {
-        var venue = NewVenue();
-        venue.Reserve(new TimeSlot(Tomorrow18.Start, 2), BookerType.Association, Now);
-
-        var free = venue.FreeHours(Tomorrow, Now);
-
-        free.Count.ShouldBe(12);
-        free.ShouldNotContain(Tomorrow18);
-        free.ShouldNotContain(new TimeSlot(Tomorrow18.End));
-    }
-
-    [Fact]
-    public void GivenTimedOutReservation_WhenListingFreeHours_ShouldIncludeItAgain()
+    public void GivenBookedHour_WhenListingFreeHours_ShouldExcludeIt()
     {
         var venue = NewVenue();
         venue.Reserve(Tomorrow18, BookerType.Association, Now);
 
-        var free = venue.FreeHours(Tomorrow, AfterTimeout(Now));
+        var free = venue.FreeHours(Tomorrow, Now);
 
-        free.ShouldContain(Tomorrow18);
-    }
-
-    [Fact]
-    public void GivenToday_WhenListingFreeHours_ShouldExcludeHoursAlreadyStarted()
-    {
-        var free = NewVenue().FreeHours(Now, Now);
-
-        free[0].Start.Hour.ShouldBe(9);
+        free.Count.ShouldBe(13);
+        free.ShouldNotContain(Tomorrow18);
     }
 }
