@@ -12,3 +12,11 @@ public readonly record struct VenueId(Guid Value)
         return new VenueId(Guid.NewGuid());
     }
 }
+
+public readonly record struct BookingId(Guid Value)
+{
+    public static BookingId New()
+    {
+        return new BookingId(Guid.NewGuid());
+    }
+}
